@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>ssense</h1>
+    <p>test</p>
+    <form action="/" method="POST">
+        <label for="title">Title</label>
+        <input type="text" name="title">
+        <label for="title">Email</label>
+        <input type="text" name="mail">
+        <label for="title">URL</label>
+        <input type="text" name="url">
+        <input type="submit" value="Create">
+    </form>
+    <h1>List</h1>
+    {% for post in posts %}
+    <h2>Title: {{post.title}}</h2>
+    <p>Email: {{post.mail}}</p>
+    <p>URL: {{post.url}}</p>
+    {% endfor %}
+    <p>{{ soup }}</p>
+    <p>{{ value }}</p>
+</body>
+</html>
