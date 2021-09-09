@@ -76,7 +76,7 @@ def index():
     if request.method == 'GET':
         posts = Post.query.all()
         url_a = 'https://www.farfetch.com/jp/shopping/men/our-legacy-air-kiss-t-item-16134350.aspx?storeid=12080'
-        url_b = 'https://www.farfetch.com/jp/shopping/men/our-legacy--item-16135241.aspx'
+        # url_b = 'https://www.farfetch.com/jp/shopping/men/our-legacy--item-16135241.aspx'
         res = requests.get(url_a)
         soup = BeautifulSoup(res.text, 'html.parser').find_all(attrs={"data-tstid": "priceInfo-onsale"})
         soup_type = type(soup)
