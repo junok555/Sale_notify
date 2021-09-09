@@ -18,9 +18,9 @@ app.config['SQLALCHEMY_ECHO'] = True
 db = SQLAlchemy(app)
 
 # Line message API
-info = json.load(open('info.json', 'r'))
-CHANNEL_ACCESS_TOKEN = info['CHANNEL_ACCESS_TOKEN']
-line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
+# info = json.load(open('info.json', 'r'))
+# CHANNEL_ACCESS_TOKEN = info['CHANNEL_ACCESS_TOKEN']
+# line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 
 # login
 #sessionを使う際にSECRET_KEYを設定
