@@ -31,14 +31,16 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 
-def main(price):
-    USER_ID = info['USER_ID']
-    messages = TextSendMessage(text='セール開始\n価格は'+price+'です。')
-    line_bot_api.push_message(USER_ID,messages=messages)
-def main_b():
-    USER_ID = info['USER_ID']
-    messages = TextSendMessage(text='セールはまだです')
-    line_bot_api.push_message(USER_ID,messages=messages)
+# def main(price):
+    # USER_ID = info['USER_ID']
+    # USER_ID = "TEST"
+    # messages = TextSendMessage(text='セール開始\n価格は'+price+'です。')
+    # line_bot_api.push_message(USER_ID,messages=messages)
+# def main_b():
+    # USER_ID = info['USER_ID']
+    # USER_ID = "TEST"
+    # messages = TextSendMessage(text='セールはまだです')
+    # line_bot_api.push_message(USER_ID,messages=messages)
 
 #Line用Postクラス 
 class Post(db.Model):
@@ -83,10 +85,10 @@ def index():
         price = soup[0].contents[0]
         if type(soup) == str:
             price = soup[0].contents[0]
-            main(price=price)
+            # main(price=price)
             return render_template('index.html', posts=posts, soup=soup, soup_type=soup_type,price=price)
         else:
-            main_b()
+            # main_b()
             return render_template('index.html', posts=posts, soup=soup, value='',soup_type=soup_type,price=price)
 
     else:
