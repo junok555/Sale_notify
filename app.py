@@ -1,35 +1,32 @@
 import os,requests, re
 from flask import Flask, render_template, request,json, redirect, url_for
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 from linebot import LineBotApi
 from linebot.models import TextSendMessage
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.mysql import INTEGER, VARCHAR
 from bs4 import BeautifulSoup
-
-login_manager = LoginManager()
+from time import sleep
 
 app = Flask(__name__)
-login_manager.init_app(app)
 
 # datebase
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ssense.db'
 app.config['SQLALCHEMY_ECHO'] = True
+app.config['SECRET_KEY'] = os.urandom(24)
+# app.config['SECRET_KEY'] = 'secret_key'
 db = SQLAlchemy(app)
+
+# login
+login_manager = LoginManager()
+login_manager.init_app(app)
+@login_manager.user_loader
 
 # Line message API
 # info = json.load(open('info.json', 'r'))
 # CHANNEL_ACCESS_TOKEN = info['CHANNEL_ACCESS_TOKEN']
 # line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
-
-# login
-#sessionを使う際にSECRET_KEYを設定
-app.config['SECRET_KEY'] = 'secret_key'
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-
-@login_manager.user_loader
 
 # def main(price):
     # USER_ID = info['USER_ID']
@@ -53,7 +50,8 @@ class Post(db.Model):
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50),nullable=False)
-    mail = db.Column(db.String(100),nullable=False)
+    password = db.Column(db.String(25))
+    mail = db.Column(db.String(100),nullable=False, unique=True)
     CHANNEL_ACCESS_TOKEN = db.Column(db.String(255))
     USER_ID = db.Column(db.String(255))
 
@@ -64,7 +62,7 @@ db.create_all()
 #DBが空の状態(最初の1回)はtestuserを作成する
 user = User.query.filter_by(username='testuser').first()
 if user is None:
-    testuser = User(username='testuser', mail='test@test')
+    testuser = User(username='testuser', mail='test@test',password='1111')
     db.session.add(testuser)
     db.session.commit()
 
@@ -72,6 +70,28 @@ if user is None:
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+#スクレイピング
+class Scr():
+    def __init__(self, urls):
+        self.urls=urls
+
+    def geturl(self):
+        all_text=[]
+        for url in self.urls:
+            r=requests.get(url)
+            c=r.content
+            soup=BeautifulSoup(c,"html.parser")
+            article1_content=soup.find_all("p")
+            temp=[]
+            for con in article1_content:
+                out=con.text
+                temp.append(out)
+            text=''.join(temp)
+            all_text.append(text)
+            sleep(1)
+        return all_text
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -98,6 +118,8 @@ def index():
         new_post = Post(title=title, mail=mail, url=url)
         db.session.add(new_post)
         db.session.commit()
+        sc=Scr(["https://www.farfetch.com/jp/shopping/men/our-legacy-air-kiss-t-item-16134350.aspx?storeid=12080"])
+        print(sc.geturl())
 
         return redirect('/')
 
@@ -105,44 +127,47 @@ def index():
 def register():
     return render_template('register.html')
 
-@app.route('/user_register', methods=['GET','POST'])
-def userregister():
+@app.route('/register/signup', methods=['GET','POST'])
+def signup():
     username = request.form.get('username')
-    mail = request.form.get('mail')
-    new_user = User(username=username, mail=mail)
-    db.session.add(new_user)
+    mail     = request.form.get('mail')
+    password = request.form.get('password')
+    # new_user = User(username=username, mail=mail, password=password)
+    # db.session.add(new_user)
+    # db.session.commit()
+
+    # users = db.session.query(User)
+    # for u in users:
+    #     print("id = {}, username = {}, mail = {}, password = {}".format(u.id, u.username, u.mail, u.password))
+    user = User(username=username,mail=mail, password=generate_password_hash(password, method='sha256'))
+    db.session.add(user)
     db.session.commit()
 
-    users = db.session.query(User)
-    for u in users:
-        print("id = {}, username = {}, mail = {}".format(u.id, u.username, u.mail))
+    return redirect(url_for("member"))
 
-    return redirect(url_for("register"))
-
-@app.route('/login')
-def login():
-    # user = User.query.filter_by(username='jun').first()
-    # login_user(user)
-    return render_template('login.html')
-
-@app.route('/login_user', methods=['POST'])
+@app.route('/login', methods=['GET','POST'])
 def loginUser():
-    mail = request.form.get('mail')
-    try:
-        user = User.query.filter(User.mail == mail).first()
-        if user == None:
-            return render_template('login.html', error="指定のユーザーは存在しません")
-        else:
-            login_user(user, remember=True)
-    except Exception as e:
-        return redirect(url_for('index'))
-    return redirect(url_for('member'))
+    if request.method == "POST":
+        mail     = request.form.get('mail')
+        password = request.form.get('password')
+        try:
+            user = User.query.filter_by(mail=mail).first()
+            if user == None:
+                return render_template('login.html', error="指定のユーザーは存在しません")
+            else:
+                if check_password_hash(user.password, password):
+                    login_user(user, remember=True)
+                    return redirect(url_for('member'))
+        except Exception as e:
+            return redirect(url_for('index'))
+    else:
+        return render_template('login.html')
 
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    return render_template('logout.html')
+    return render_template('login.html')
 
 @app.route('/member')
 @login_required

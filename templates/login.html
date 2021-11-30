@@ -17,15 +17,12 @@
     </ui>
     <!-- login form -->
     <p>{% if error %}{{ error }}{% endif %}</p>
-    <form action="/login_user" method="post">
-
-        <div>
-            <label for="title">Email</label>
-            <input type="text" name="mail">
-        </div>
-        <div>
-            <input type="submit">
-        </div>
+    <form action="/login" method="post">
+        <label for="title">Email</label>
+        <input type="text" name="mail">
+        <label for="">パスワード</label>
+        <input type="password" name="password">
+        <input type="submit">
     </form>
 </body>
 </html>
