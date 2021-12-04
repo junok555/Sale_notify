@@ -19,9 +19,9 @@
     <p>{% if error %}{{ error }}{% endif %}</p>
     <form action="/login" method="post">
         <label for="title">Email</label>
-        <input type="text" name="mail">
+        <input type="text" name="mail" required>
         <label for="">パスワード</label>
-        <input type="password" name="password">
+        <input type="password" name="password" required>
         <input type="submit">
     </form>
 </body>

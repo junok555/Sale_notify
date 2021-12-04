@@ -14,25 +14,9 @@
         <li><a href='/login'>ログインはこちら</a></li>
         <li><a href='/logout'>ログアウトはこちら</a></li>
     </ui>
-    <p>test</p>
-    <form action="/" method="POST">
-        <label for="title">Title</label>
-        <input type="text" name="title">
-        <label for="title">Email</label>
-        <input type="text" name="mail">
-        <label for="title">URL</label>
-        <input type="text" name="url">
-        <input type="submit" value="Create">
-    </form>
-    <h1>List</h1>
-    {% for post in posts %}
-    <h2>Title: {{post.title}}</h2>
-    <p>Email: {{post.mail}}</p>
-    <p>URL: {{post.url}}</p>
-    {% endfor %}
+    <h2>List</h2>
     <p>{{ soup }}</p>
     <p>{{ soup_type }}</p>
     <p>{{ price }}</p>
-
 </body>
 </html>
