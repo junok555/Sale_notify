@@ -14,9 +14,29 @@
         <li><a href='/login'>ログインはこちら</a></li>
         <li><a href='/logout'>ログアウトはこちら</a></li>
     </ui>
-    <h2>List</h2>
-    <p>{{ soup }}</p>
-    <p>{{ soup_type }}</p>
-    <p>{{ price }}</p>
+    <h2>List (for development)</h2>
+    <ul>
+        <li>{{ soup }}</li>
+        <li><{{ soup_type }}</li>
+        <li>{{ name }}</li>
+        <li>{{ price }}</li>
+    </ul>
+    <h2>Sample Price Lsit (scraping)</h2>
+    <a href="https://www.farfetch.com/jp/shopping/men/maison-margiela-x-reebok-classic-tabi-item-16261856.aspx?storeid=12850">Margiela * Reebok (link)</a>
+    <table border="1">
+        <tr>
+            <th>更新日時</th>
+            <th>商品名</th>
+            <th>価格</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{item.date}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.price}}</td>
+        </tr>
+		{% endfor %}
+    </table>
+
 </body>
 </html>

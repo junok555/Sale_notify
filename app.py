@@ -5,9 +5,10 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from linebot import LineBotApi
 from linebot.models import TextSendMessage
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.dialects.mysql import INTEGER, VARCHAR
+
 from bs4 import BeautifulSoup
-from time import sleep
+from time import localtime, sleep
+import time,datetime
 
 app = Flask(__name__)
 
@@ -49,9 +50,16 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50),nullable=False)
     password = db.Column(db.String(25))
-    mail = db.Column(db.String(100),nullable=False, unique=True)
+    mail = db.Column(db.String(100),nullable=False)
     CHANNEL_ACCESS_TOKEN = db.Column(db.String(255))
     USER_ID = db.Column(db.String(255))
+
+# item Class
+class Item(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(100))
+    name = db.Column(db.String(100))
+    price = db.Column(db.String(255))
 
 #DBのクリエイト宣言
 db.create_all()
@@ -69,41 +77,52 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 #スクレイピング
-class Scr():
-    def __init__(self, urls):
-        self.urls=urls
+# class Scr():
+#     def __init__(self, urls):
+#         self.urls=urls
 
-    def geturl(self):
-        all_text=[]
-        for url in self.urls:
-            r=requests.get(url)
-            c=r.content
-            soup=BeautifulSoup(c,"html.parser")
-            article1_content=soup.find_all("p")
-            temp=[]
-            for con in article1_content:
-                out=con.text
-                temp.append(out)
-            text=''.join(temp)
-            all_text.append(text)
-            sleep(1)
-        return all_text
+#     def geturl(self):
+#         all_text=[]
+#         for url in self.urls:
+#             r=requests.get(url)
+#             c=r.content
+#             soup=BeautifulSoup(c,"html.parser")
+#             article1_content=soup.find_all("p")
+#             temp=[]
+#             for con in article1_content:
+#                 out=con.text
+#                 temp.append(out)
+#             text=''.join(temp)
+#             all_text.append(text)
+#             sleep(1)
+#         return all_text
 
 @app.route('/', methods=['GET'])
 def index():
-    url_a = 'https://www.farfetch.com/jp/shopping/men/our-legacy-air-kiss-t-item-16134350.aspx?storeid=12080'
+    url_a = 'https://www.farfetch.com/jp/shopping/men/maison-margiela-x-reebok-classic-tabi-item-16261856.aspx?storeid=12850'
     # url_b = 'https://www.farfetch.com/jp/shopping/men/our-legacy--item-16135241.aspx'
     res = requests.get(url_a)
-    soup = BeautifulSoup(res.text, 'html.parser').find_all(attrs={"data-tstid": "priceInfo-onsale"})
-    soup_type = type(soup)
-    price = soup[0].contents[0]
-    if type(soup) == str:
-        price = soup[0].contents[0]
+    soup_price = BeautifulSoup(res.text, 'html.parser').find_all(attrs={"data-tstid": "priceInfo-onsale"})
+    soup_name = BeautifulSoup(res.text, 'html.parser').find_all(attrs={"data-tstid": "cardInfo-description"})
+    soup_type = type(soup_price)
+    price = soup_price[0].contents[0]
+    item_name = soup_name[0].contents[0]
+
+    dt_now = datetime.datetime.now()
+    items = Item(date=dt_now,name=item_name, price=price)
+    db.session.add(items)
+    db.session.commit()
+
+    items = Item.query.all()
+
+    if type(soup_price) == str:
         # main(price=price)
-        return render_template('index.html', soup=soup, soup_type=soup_type,price=price)
+        a=11
+        return render_template('index.html', a=a,soup=soup_price, soup_type=soup_type,price=price, name=item_name)
     else:
         # main_b()
-        return render_template('index.html', soup=soup, value='',soup_type=soup_type,price=price)
+        a=13
+        return render_template('index.html', a=a,soup=soup_price,soup_type=soup_type,price=price,name=item_name,items=items)
 
 @app.route('/register', methods=['GET','POST'])
 def signup():
@@ -156,7 +175,7 @@ def logout():
 def member():
     username = current_user.username
     return render_template('member.html',username=username)
-    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
