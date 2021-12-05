@@ -156,6 +156,7 @@ def logout():
 def member():
     username = current_user.username
     return render_template('member.html',username=username)
+    
 
 if __name__ == '__main__':
     app.run(debug=True)
